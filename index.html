@@ -1,1370 +1,1743 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valentine's Matcher 💘</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --rose-50: #fff1f2;
-            --rose-100: #ffe4e6;
-            --rose-200: #fecdd3;
-            --rose-300: #fda4af;
-            --rose-400: #fb7185;
-            --rose-500: #f43f5e;
-            --rose-600: #e11d48;
-            --rose-700: #be123c;
-            --rose-800: #9f1239;
-            --pink-400: #f472b6;
-            --pink-500: #ec4899;
-            --violet-500: #8b5cf6;
-            --cream: #fffbf5;
-            --text: #1f1f1f;
-            --text-light: #6b6b6b;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, var(--rose-50) 0%, var(--cream) 50%, var(--rose-100) 100%);
-            color: var(--text);
-            min-height: 100vh;
-            overflow-x: hidden;
-            position: relative;
-        }
-
-        /* Dribbble-inspired video background - all pages */
-        .hero-video-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        .hero-video-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, rgba(255, 241, 242, 0.6) 0%, rgba(254, 205, 211, 0.45) 35%, rgba(253, 164, 175, 0.4) 65%, rgba(190, 18, 60, 0.7) 100%);
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* Animated background */
-        .background-pattern {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.4;
-            background-image: 
-                radial-gradient(circle at 20% 50%, var(--rose-200) 0%, transparent 50%),
-                radial-gradient(circle at 80% 80%, var(--pink-400) 0%, transparent 50%),
-                radial-gradient(circle at 40% 80%, var(--violet-500) 0%, transparent 50%);
-            animation: backgroundShift 20s ease infinite;
-        }
-
-        @keyframes backgroundShift {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(50px, 30px); }
-        }
-
-        /* Floating hearts */
-        .hearts-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-
-        .floating-heart {
-            position: absolute;
-            font-size: 24px;
-            opacity: 0.15;
-            animation: float 15s infinite;
-            filter: blur(1px);
-        }
-
-        @keyframes float {
-            0% {
-                transform: translateY(100vh) rotate(0deg) scale(0.5);
-                opacity: 0;
-            }
-            10% {
-                opacity: 0.15;
-            }
-            90% {
-                opacity: 0.15;
-            }
-            100% {
-                transform: translateY(-100px) rotate(180deg) scale(1);
-                opacity: 0;
-            }
-        }
-
-        /* Progress Bar - blended glass effect */
-        .progress-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(180deg, rgba(255, 241, 242, 0.85) 0%, rgba(255, 251, 245, 0.6) 70%, rgba(255, 228, 230, 0.3) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            padding: 1rem 2rem;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            z-index: 100;
-            box-shadow: 0 1px 0 rgba(253, 164, 175, 0.2);
-        }
-
-        .progress-container.active {
-            display: flex;
-        }
-
-        .progress-heart {
-            font-size: 1.5rem;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            opacity: 0.35;
-            filter: grayscale(80%);
-        }
-
-        .progress-heart.filled {
-            opacity: 1;
-            filter: grayscale(0%);
-            transform: scale(1.15);
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 2rem;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .quiz-active .container {
-            padding-top: 7rem;
-        }
-
-        /* Pages */
-        .page {
-            display: none;
-            animation: fadeSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        .page.active {
-            display: block;
-        }
-
-        @keyframes fadeSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* Landing Page - Dribbble-inspired entrance */
-        .hero {
-            text-align: center;
-            padding: 2rem 0;
-            animation: heroReveal 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        @keyframes heroReveal {
-            from {
-                opacity: 0;
-                transform: translateY(24px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .hero-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            margin-bottom: 2rem;
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
-            animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
-        }
-
-        .hero h1 {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(2.5rem, 8vw, 4.5rem);
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            background: linear-gradient(135deg, var(--rose-600), var(--pink-500), var(--violet-500));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            background-size: 200% 200%;
-            animation: gradientFlow 5s ease infinite, heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s backwards;
-        }
-
-        @keyframes gradientFlow {
-            0%, 100% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-        }
-
-        .hero-subtitle {
-            font-size: 1.25rem;
-            color: var(--text-light);
-            margin-bottom: 0.75rem;
-            font-weight: 400;
-            line-height: 1.6;
-            animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards;
-        }
-
-        .hero-tagline {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.5rem;
-            color: var(--rose-500);
-            margin-bottom: 3rem;
-            animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s backwards;
-        }
-
-        .cta-button {
-            background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
-            border: none;
-            color: white;
-            font-size: 1.125rem;
-            font-weight: 600;
-            padding: 1.25rem 3.5rem;
-            border-radius: 100px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            font-family: 'Inter', sans-serif;
-            letter-spacing: 0.5px;
-            box-shadow: 0 10px 30px rgba(244, 63, 94, 0.3);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .cta-button::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.6s;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 15px 40px rgba(244, 63, 94, 0.4);
-        }
-
-        .cta-button:hover::before {
-            left: 100%;
-        }
-
-        .landing-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            align-items: center;
-            animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s backwards;
-        }
-
-        .cta-secondary {
-            background: linear-gradient(135deg, var(--violet-500), var(--pink-500));
-            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
-        }
-
-        .cta-secondary:hover {
-            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
-        }
-
-        /* Couples section */
-        .couples-section {
-            text-align: center;
-            max-width: 520px;
-            margin: 0 auto;
-            animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .couples-instructions {
-            display: flex;
-            flex-direction: column;
-            gap: 1.25rem;
-            margin: 2.5rem 0;
-        }
-
-        .instruction-step {
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            text-align: left;
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.5) 100%);
-            backdrop-filter: blur(12px);
-            padding: 1.25rem 1.5rem;
-            border-radius: 16px;
-            border: 1px solid rgba(253, 164, 175, 0.4);
-            box-shadow: 0 4px 20px rgba(244, 63, 94, 0.06);
-        }
-
-        .step-number {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 1.125rem;
-            flex-shrink: 0;
-        }
-
-        .instruction-step p {
-            margin: 0;
-            color: var(--text);
-            font-size: 1rem;
-        }
-
-        .couples-partner-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--violet-500), var(--pink-500));
-            color: white;
-            padding: 0.4rem 1.25rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 1.25rem;
-            letter-spacing: 0.5px;
-        }
-
-        .couples-score-label {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.5rem;
-            color: var(--rose-600);
-            margin-top: -1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .couples-verdict-card {
-            max-width: 500px;
-            margin: 0 auto 2rem;
-        }
-
-        @media (max-width: 768px) {
-            .landing-buttons {
-                width: 100%;
-            }
-
-            .landing-buttons .cta-button {
-                width: 100%;
-            }
-        }
-
-        /* Gender Selection */
-        .gender-section {
-            text-align: center;
-            max-width: 680px;
-            margin: 0 auto;
-            animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .section-title {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.75rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--rose-700), var(--pink-500));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .section-subtitle {
-            font-size: 1.125rem;
-            color: var(--text-light);
-            margin-bottom: 2.5rem;
-            line-height: 1.6;
-        }
-
-        .gender-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .gender-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 241, 242, 0.4) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(253, 164, 175, 0.4);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(244, 63, 94, 0.08);
-            padding: 2.5rem 1.75rem;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .gender-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 24px;
-            padding: 2px;
-            background: linear-gradient(135deg, transparent, rgba(244, 63, 94, 0.2), transparent, rgba(236, 72, 153, 0.2));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .gender-card:hover {
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 25px 50px rgba(244, 63, 94, 0.12), 0 0 0 1px rgba(244, 63, 94, 0.08);
-            border-color: rgba(244, 63, 94, 0.3);
-        }
-
-        .gender-card:hover::before {
-            opacity: 1;
-        }
-
-        .gender-label {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text);
-            letter-spacing: 0.3px;
-        }
-
-        .gender-card:hover .gender-label {
-            color: var(--rose-700);
-        }
-
-        .gender-sublabel {
-            font-size: 0.8rem;
-            color: var(--text-light);
-            margin-top: 0.35rem;
-        }
-
-        /* Quiz */
-        .quiz-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 241, 242, 0.4) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 28px;
-            padding: 3rem 2.5rem;
-            box-shadow: 0 20px 60px rgba(244, 63, 94, 0.08), 0 0 0 1px rgba(253, 164, 175, 0.2);
-            border: 1px solid rgba(253, 164, 175, 0.35);
-            animation: heroReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .question-header {
-            margin-bottom: 2.5rem;
-            text-align: center;
-        }
-
-        .question-counter {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--rose-100), var(--rose-50));
-            color: var(--rose-700);
-            padding: 0.5rem 1.25rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            letter-spacing: 0.5px;
-            border: 1px solid rgba(253, 164, 175, 0.4);
-        }
-
-        .question-text {
-            font-family: 'Playfair Display', serif;
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: var(--text);
-            line-height: 1.4;
-        }
-
-        .options-grid {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .option-card {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(255, 241, 242, 0.5));
-            backdrop-filter: blur(8px);
-            border: 2px solid rgba(253, 164, 175, 0.35);
-            border-radius: 16px;
-            padding: 1.5rem 1.75rem;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            font-size: 1rem;
-            font-weight: 500;
-            color: var(--text);
-            position: relative;
-            line-height: 1.5;
-            box-shadow: 0 2px 12px rgba(244, 63, 94, 0.05);
-        }
-
-        .option-card::before {
-            content: '♡';
-            position: absolute;
-            right: 1.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.5rem;
-            opacity: 0;
-            transition: all 0.3s ease;
-            color: var(--rose-500);
-        }
-
-        .option-card:hover {
-            background: rgba(255, 255, 255, 0.95);
-            border-color: var(--rose-400);
-            transform: translateX(8px);
-            box-shadow: 0 8px 24px rgba(244, 63, 94, 0.15);
-        }
-
-        .option-card:hover::before {
-            opacity: 1;
-        }
-
-        .option-card.selected {
-            background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
-            border-color: var(--rose-600);
-            color: white;
-        }
-
-        .option-card.selected::before {
-            content: '♥';
-            opacity: 1;
-            color: white;
-        }
-
-        /* Loading */
-        .loading-section {
-            text-align: center;
-            padding: 3rem 0;
-            animation: heroReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .loading-animation {
-            display: flex;
-            justify-content: center;
-            gap: 1rem;
-            margin: 3rem 0;
-        }
-
-        .loading-dot {
-            width: 20px;
-            height: 20px;
-            background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
-            border-radius: 50%;
-            animation: loadingBounce 1.4s infinite ease-in-out both;
-        }
-
-        .loading-dot:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dot:nth-child(2) { animation-delay: -0.16s; }
-
-        @keyframes loadingBounce {
-            0%, 80%, 100% { transform: scale(0); }
-            40% { transform: scale(1); }
-        }
-
-        .loading-message {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            font-weight: 600;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--rose-700), var(--pink-500));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .loading-submessage {
-            font-size: 1.125rem;
-            color: var(--text-light);
-        }
-
-        /* Results */
-        .results-section {
-            text-align: center;
-            animation: heroReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-        }
-
-        .compatibility-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 1rem;
-            text-transform: uppercase;
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
-        }
-
-        .compatibility-score {
-            font-family: 'Playfair Display', serif;
-            font-size: 5rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, var(--rose-600), var(--pink-500));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 3rem;
-            animation: scoreReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        @keyframes scoreReveal {
-            from {
-                transform: scale(0) rotate(-180deg);
-                opacity: 0;
-            }
-            to {
-                transform: scale(1) rotate(0deg);
-                opacity: 1;
-            }
-        }
-
-        .character-profile {
-            background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 241, 242, 0.4) 100%);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border-radius: 28px;
-            padding: 3rem 2.5rem;
-            box-shadow: 0 20px 60px rgba(244, 63, 94, 0.08), 0 0 0 1px rgba(253, 164, 175, 0.2);
-            border: 1px solid rgba(253, 164, 175, 0.35);
-            margin-bottom: 2rem;
-            animation: cardAppear 0.6s ease 0.3s backwards;
-        }
-
-        @keyframes cardAppear {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .character-name {
-            font-family: 'Playfair Display', serif;
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 0.75rem;
-            color: var(--rose-700);
-        }
-
-        .character-tag {
-            display: inline-block;
-            background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
-            color: white;
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-size: 0.875rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            margin-bottom: 2rem;
-            text-transform: uppercase;
-        }
-
-        .character-quote {
-            font-family: 'Dancing Script', cursive;
-            font-size: 1.75rem;
-            color: var(--rose-600);
-            margin-bottom: 1.5rem;
-            font-style: italic;
-            line-height: 1.5;
-        }
-
-        .character-bio {
-            font-size: 1.125rem;
-            line-height: 1.8;
-            color: var(--text-light);
-            margin-bottom: 2rem;
-        }
-
-        .character-verdict {
-            background: var(--rose-50);
-            border-left: 4px solid var(--rose-500);
-            padding: 1.5rem;
-            border-radius: 12px;
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--text);
-            line-height: 1.6;
-        }
-
-        .action-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .action-button {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(8px);
-            border: 2px solid rgba(253, 164, 175, 0.5);
-            color: var(--rose-700);
-            font-size: 1rem;
-            font-weight: 600;
-            padding: 1rem 1.5rem;
-            border-radius: 100px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            font-family: 'Inter', sans-serif;
-            box-shadow: 0 4px 15px rgba(244, 63, 94, 0.08);
-        }
-
-        .action-button:hover {
-            background: var(--rose-500);
-            border-color: var(--rose-500);
-            color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2);
-        }
-
-        .easter-egg {
-            margin-top: 2.5rem;
-            font-size: 0.9rem;
-            color: var(--text-light);
-            font-style: italic;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 1.5rem;
-            }
-
-            .quiz-active .container {
-                padding-top: 6rem;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-
-            .quiz-card,
-            .character-profile {
-                padding: 2rem 1.5rem;
-            }
-
-            .question-text {
-                font-size: 1.5rem;
-            }
-
-            .compatibility-score {
-                font-size: 3.5rem;
-            }
-
-            .character-name {
-                font-size: 2rem;
-            }
-
-            .action-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .progress-heart {
-                font-size: 1.25rem;
-            }
-
-            .gender-grid {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            .gender-card {
-                padding: 2rem 1.5rem;
-            }
-
-            .section-title {
-                font-size: 2rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valentine's Matcher 💘</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Inter:wght@300;400;500;600;700&family=Dancing+Script:wght@600;700&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --rose-50: #fff1f2;
+      --rose-100: #ffe4e6;
+      --rose-200: #fecdd3;
+      --rose-300: #fda4af;
+      --rose-400: #fb7185;
+      --rose-500: #f43f5e;
+      --rose-600: #e11d48;
+      --rose-700: #be123c;
+      --rose-800: #9f1239;
+      --pink-400: #f472b6;
+      --pink-500: #ec4899;
+      --violet-500: #8b5cf6;
+      --cream: #fffbf5;
+      --text: #1f1f1f;
+      --text-light: #6b6b6b;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, var(--rose-50) 0%, var(--cream) 50%, var(--rose-100) 100%);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* Dribbble-inspired video background - all pages */
+    .hero-video-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .hero-video-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(180deg, rgba(255, 241, 242, 0.6) 0%, rgba(254, 205, 211, 0.45) 35%, rgba(253, 164, 175, 0.4) 65%, rgba(190, 18, 60, 0.7) 100%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* Animated background */
+    .background-pattern {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.4;
+      background-image:
+        radial-gradient(circle at 20% 50%, var(--rose-200) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, var(--pink-400) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, var(--violet-500) 0%, transparent 50%);
+      animation: backgroundShift 20s ease infinite;
+    }
+
+    @keyframes backgroundShift {
+
+      0%,
+      100% {
+        transform: translate(0, 0);
+      }
+
+      50% {
+        transform: translate(50px, 30px);
+      }
+    }
+
+    /* Floating hearts */
+    .hearts-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .floating-heart {
+      position: absolute;
+      font-size: 24px;
+      opacity: 0.15;
+      animation: float 15s infinite;
+      filter: blur(1px);
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg) scale(0.5);
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.15;
+      }
+
+      90% {
+        opacity: 0.15;
+      }
+
+      100% {
+        transform: translateY(-100px) rotate(180deg) scale(1);
+        opacity: 0;
+      }
+    }
+
+    /* Progress Bar - blended glass effect */
+    .progress-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(180deg, rgba(255, 241, 242, 0.85) 0%, rgba(255, 251, 245, 0.6) 70%, rgba(255, 228, 230, 0.3) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      padding: 1rem 2rem;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      z-index: 100;
+      box-shadow: 0 1px 0 rgba(253, 164, 175, 0.2);
+    }
+
+    .progress-container.active {
+      display: flex;
+    }
+
+    .progress-heart {
+      font-size: 1.5rem;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      opacity: 0.35;
+      filter: grayscale(80%);
+    }
+
+    .progress-heart.filled {
+      opacity: 1;
+      filter: grayscale(0%);
+      transform: scale(1.15);
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .quiz-active .container {
+      padding-top: 7rem;
+    }
+
+    /* Pages */
+    .page {
+      display: none;
+      animation: fadeSlideIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .page.active {
+      display: block;
+    }
+
+    @keyframes fadeSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    /* Landing Page - Dribbble-inspired entrance */
+    .hero {
+      text-align: center;
+      padding: 2rem 0;
+      animation: heroReveal 1s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    @keyframes heroReveal {
+      from {
+        opacity: 0;
+        transform: translateY(24px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
+      animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s backwards;
+    }
+
+    .hero h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(2.5rem, 8vw, 4.5rem);
+      font-weight: 900;
+      line-height: 1.1;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, var(--rose-600), var(--pink-500), var(--violet-500));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      background-size: 200% 200%;
+      animation: gradientFlow 5s ease infinite, heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s backwards;
+    }
+
+    @keyframes gradientFlow {
+
+      0%,
+      100% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+    }
+
+    .hero-subtitle {
+      font-size: 1.25rem;
+      color: var(--text-light);
+      margin-bottom: 0.75rem;
+      font-weight: 400;
+      line-height: 1.6;
+      animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s backwards;
+    }
+
+    .hero-tagline {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.5rem;
+      color: var(--rose-500);
+      margin-bottom: 3rem;
+      animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.4s backwards;
+    }
+
+    .cta-button {
+      background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
+      border: none;
+      color: white;
+      font-size: 1.125rem;
+      font-weight: 600;
+      padding: 1.25rem 3.5rem;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-family: 'Inter', sans-serif;
+      letter-spacing: 0.5px;
+      box-shadow: 0 10px 30px rgba(244, 63, 94, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cta-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+      transition: left 0.6s;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 15px 40px rgba(244, 63, 94, 0.4);
+    }
+
+    .cta-button:hover::before {
+      left: 100%;
+    }
+
+    .landing-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: center;
+      animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 0.5s backwards;
+    }
+
+    .cta-secondary {
+      background: linear-gradient(135deg, var(--violet-500), var(--pink-500));
+      box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3);
+    }
+
+    .cta-secondary:hover {
+      box-shadow: 0 15px 40px rgba(139, 92, 246, 0.4);
+    }
+
+    /* Couples section */
+    .couples-section {
+      text-align: center;
+      max-width: 520px;
+      margin: 0 auto;
+      animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .couples-instructions {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      margin: 2.5rem 0;
+    }
+
+    .instruction-step {
+      display: flex;
+      align-items: center;
+      gap: 1.25rem;
+      text-align: left;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 241, 242, 0.5) 100%);
+      backdrop-filter: blur(12px);
+      padding: 1.25rem 1.5rem;
+      border-radius: 16px;
+      border: 1px solid rgba(253, 164, 175, 0.4);
+      box-shadow: 0 4px 20px rgba(244, 63, 94, 0.06);
+    }
+
+    .step-number {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 1.125rem;
+      flex-shrink: 0;
+    }
+
+    .instruction-step p {
+      margin: 0;
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    .couples-partner-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--violet-500), var(--pink-500));
+      color: white;
+      padding: 0.4rem 1.25rem;
+      border-radius: 50px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      margin-bottom: 1.25rem;
+      letter-spacing: 0.5px;
+    }
+
+    .couples-score-label {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.5rem;
+      color: var(--rose-600);
+      margin-top: -1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .couples-verdict-card {
+      max-width: 500px;
+      margin: 0 auto 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .landing-buttons {
+        width: 100%;
+      }
+
+      .landing-buttons .cta-button {
+        width: 100%;
+      }
+    }
+
+    /* Gender Selection */
+    .gender-section {
+      text-align: center;
+      max-width: 680px;
+      margin: 0 auto;
+      animation: heroReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--rose-700), var(--pink-500));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .section-subtitle {
+      font-size: 1.125rem;
+      color: var(--text-light);
+      margin-bottom: 2.5rem;
+      line-height: 1.6;
+    }
+
+    .gender-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .gender-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 241, 242, 0.4) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(253, 164, 175, 0.4);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(244, 63, 94, 0.08);
+      padding: 2.5rem 1.75rem;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gender-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 24px;
+      padding: 2px;
+      background: linear-gradient(135deg, transparent, rgba(244, 63, 94, 0.2), transparent, rgba(236, 72, 153, 0.2));
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+
+    .gender-card:hover {
+      transform: translateY(-10px) scale(1.02);
+      box-shadow: 0 25px 50px rgba(244, 63, 94, 0.12), 0 0 0 1px rgba(244, 63, 94, 0.08);
+      border-color: rgba(244, 63, 94, 0.3);
+    }
+
+    .gender-card:hover::before {
+      opacity: 1;
+    }
+
+    .gender-label {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.3px;
+    }
+
+    .gender-card:hover .gender-label {
+      color: var(--rose-700);
+    }
+
+    .gender-sublabel {
+      font-size: 0.8rem;
+      color: var(--text-light);
+      margin-top: 0.35rem;
+    }
+
+    /* Quiz */
+    .quiz-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 241, 242, 0.4) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 28px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 20px 60px rgba(244, 63, 94, 0.08), 0 0 0 1px rgba(253, 164, 175, 0.2);
+      border: 1px solid rgba(253, 164, 175, 0.35);
+      animation: heroReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .question-header {
+      margin-bottom: 2.5rem;
+      text-align: center;
+    }
+
+    .question-counter {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--rose-100), var(--rose-50));
+      color: var(--rose-700);
+      padding: 0.5rem 1.25rem;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      letter-spacing: 0.5px;
+      border: 1px solid rgba(253, 164, 175, 0.4);
+    }
+
+    .question-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.75rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+    }
+
+    .options-grid {
+      display: grid;
+      gap: 1rem;
+    }
+
+    .option-card {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.8), rgba(255, 241, 242, 0.5));
+      backdrop-filter: blur(8px);
+      border: 2px solid rgba(253, 164, 175, 0.35);
+      border-radius: 16px;
+      padding: 1.5rem 1.75rem;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      position: relative;
+      line-height: 1.5;
+      box-shadow: 0 2px 12px rgba(244, 63, 94, 0.05);
+    }
+
+    .option-card::before {
+      content: '♡';
+      position: absolute;
+      right: 1.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1.5rem;
+      opacity: 0;
+      transition: all 0.3s ease;
+      color: var(--rose-500);
+    }
+
+    .option-card:hover {
+      background: rgba(255, 255, 255, 0.95);
+      border-color: var(--rose-400);
+      transform: translateX(8px);
+      box-shadow: 0 8px 24px rgba(244, 63, 94, 0.15);
+    }
+
+    .option-card:hover::before {
+      opacity: 1;
+    }
+
+    .option-card.selected {
+      background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
+      border-color: var(--rose-600);
+      color: white;
+    }
+
+    .option-card.selected::before {
+      content: '♥';
+      opacity: 1;
+      color: white;
+    }
+
+    /* Loading */
+    .loading-section {
+      text-align: center;
+      padding: 3rem 0;
+      animation: heroReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .loading-animation {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 3rem 0;
+    }
+
+    .loading-dot {
+      width: 20px;
+      height: 20px;
+      background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
+      border-radius: 50%;
+      animation: loadingBounce 1.4s infinite ease-in-out both;
+    }
+
+    .loading-dot:nth-child(1) {
+      animation-delay: -0.32s;
+    }
+
+    .loading-dot:nth-child(2) {
+      animation-delay: -0.16s;
+    }
+
+    @keyframes loadingBounce {
+
+      0%,
+      80%,
+      100% {
+        transform: scale(0);
+      }
+
+      40% {
+        transform: scale(1);
+      }
+    }
+
+    .loading-message {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, var(--rose-700), var(--pink-500));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .loading-submessage {
+      font-size: 1.125rem;
+      color: var(--text-light);
+    }
+
+    /* Results */
+    .results-section {
+      text-align: center;
+      animation: heroReveal 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+
+    .compatibility-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
+      color: white;
+      padding: 0.75rem 2rem;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-bottom: 1rem;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3);
+    }
+
+    .compatibility-score {
+      font-family: 'Playfair Display', serif;
+      font-size: 5rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--rose-600), var(--pink-500));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 3rem;
+      animation: scoreReveal 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes scoreReveal {
+      from {
+        transform: scale(0) rotate(-180deg);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    .character-profile {
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 241, 242, 0.4) 100%);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-radius: 28px;
+      padding: 3rem 2.5rem;
+      box-shadow: 0 20px 60px rgba(244, 63, 94, 0.08), 0 0 0 1px rgba(253, 164, 175, 0.2);
+      border: 1px solid rgba(253, 164, 175, 0.35);
+      margin-bottom: 2rem;
+      animation: cardAppear 0.6s ease 0.3s backwards;
+    }
+
+    @keyframes cardAppear {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .character-name {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+      color: var(--rose-700);
+    }
+
+    .character-tag {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--rose-500), var(--pink-500));
+      color: white;
+      padding: 0.5rem 1.5rem;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 2rem;
+      text-transform: uppercase;
+    }
+
+    .character-quote {
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.75rem;
+      color: var(--rose-600);
+      margin-bottom: 1.5rem;
+      font-style: italic;
+      line-height: 1.5;
+    }
+
+    .character-bio {
+      font-size: 1.125rem;
+      line-height: 1.8;
+      color: var(--text-light);
+      margin-bottom: 2rem;
+    }
+
+    .character-verdict {
+      background: var(--rose-50);
+      border-left: 4px solid var(--rose-500);
+      padding: 1.5rem;
+      border-radius: 12px;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .action-button {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(8px);
+      border: 2px solid rgba(253, 164, 175, 0.5);
+      color: var(--rose-700);
+      font-size: 1rem;
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 15px rgba(244, 63, 94, 0.08);
+    }
+
+    .action-button:hover {
+      background: var(--rose-500);
+      border-color: var(--rose-500);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(244, 63, 94, 0.2);
+    }
+
+    .easter-egg {
+      margin-top: 2.5rem;
+      font-size: 0.9rem;
+      color: var(--text-light);
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1.5rem;
+      }
+
+      .quiz-active .container {
+        padding-top: 6rem;
+      }
+
+      .hero h1 {
+        font-size: 2.5rem;
+      }
+
+      .quiz-card,
+      .character-profile {
+        padding: 2rem 1.5rem;
+      }
+
+      .question-text {
+        font-size: 1.5rem;
+      }
+
+      .compatibility-score {
+        font-size: 3.5rem;
+      }
+
+      .character-name {
+        font-size: 2rem;
+      }
+
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .progress-heart {
+        font-size: 1.25rem;
+      }
+
+      .gender-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .gender-card {
+        padding: 2rem 1.5rem;
+      }
+
+      .section-title {
+        font-size: 2rem;
+      }
+    }
+
+    /* Floating music control - bottom-right, minimal */
+    .music-toggle-btn {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 9999;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1px solid rgba(253, 164, 175, 0.5);
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.95), rgba(255, 241, 242, 0.8));
+      backdrop-filter: blur(8px);
+      color: var(--rose-600);
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 12px rgba(244, 63, 94, 0.15);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .music-toggle-btn:hover {
+      transform: scale(1.08);
+      box-shadow: 0 6px 16px rgba(244, 63, 94, 0.25);
+    }
+  </style>
 </head>
+
 <body class="landing-active">
-    <!-- Dribbble-inspired video background (landing only) -->
-    <video class="hero-video-bg" autoplay muted loop playsinline>
-        <source src="https://cdn.dribbble.com/userupload/30589299/file/original-c18a0fb822ae63b52cbd0c4fb0cc7774.mp4" type="video/mp4">
-    </video>
-    <div class="hero-video-overlay"></div>
-    <!-- Background -->
-    <div class="background-pattern"></div>
-    <div class="hearts-bg" id="heartsBg"></div>
+  <!-- Dribbble-inspired video background (landing only) -->
+  <video class="hero-video-bg" autoplay muted loop playsinline>
+    <source src="https://cdn.dribbble.com/userupload/30589299/file/original-c18a0fb822ae63b52cbd0c4fb0cc7774.mp4"
+      type="video/mp4">
+  </video>
+  <div class="hero-video-overlay"></div>
+  <!-- Background -->
+  <div class="background-pattern"></div>
+  <div class="hearts-bg" id="heartsBg"></div>
 
-    <!-- Progress Bar -->
-    <div class="progress-container" id="progressBar">
-        <div class="progress-heart" data-step="1">🤍</div>
-        <div class="progress-heart" data-step="2">🤍</div>
-        <div class="progress-heart" data-step="3">🤍</div>
-        <div class="progress-heart" data-step="4">🤍</div>
-        <div class="progress-heart" data-step="5">🤍</div>
-        <div class="progress-heart" data-step="6">🤍</div>
-        <div class="progress-heart" data-step="7">🤍</div>
-        <div class="progress-heart" data-step="8">🤍</div>
-        <div class="progress-heart" data-step="9">🤍</div>
-        <div class="progress-heart" data-step="10">🤍</div>
+  <!-- Background music (starts after first user click) -->
+  <audio id="bgMusic" src="cupid.mp3" loop preload="auto"></audio>
+  <button type="button" id="musicToggle" class="music-toggle-btn" title="Play/Pause music" aria-label="Play/Pause background music">▶</button>
+
+  <!-- Progress Bar -->
+  <div class="progress-container" id="progressBar">
+    <div class="progress-heart" data-step="1">🤍</div>
+    <div class="progress-heart" data-step="2">🤍</div>
+    <div class="progress-heart" data-step="3">🤍</div>
+    <div class="progress-heart" data-step="4">🤍</div>
+    <div class="progress-heart" data-step="5">🤍</div>
+    <div class="progress-heart" data-step="6">🤍</div>
+    <div class="progress-heart" data-step="7">🤍</div>
+    <div class="progress-heart" data-step="8">🤍</div>
+    <div class="progress-heart" data-step="9">🤍</div>
+    <div class="progress-heart" data-step="10">🤍</div>
+  </div>
+
+  <div class="container">
+    <!-- Landing Page -->
+    <div id="landing" class="page active">
+      <div class="hero">
+        <div class="hero-badge">✨ Valentine's Special 2026</div>
+        <h1>Discover Your Perfect Valentine</h1>
+        <p class="hero-subtitle">
+          Answer 10 questions to find your match<br>
+          from popular characters across film, anime & fiction
+        </p>
+        <p class="hero-tagline">~where fate meets chaos~</p>
+        <div class="landing-buttons">
+          <button class="cta-button" onclick="showGenderPage()">Find Your Match 💕</button>
+          <button class="cta-button cta-secondary" onclick="showCouplesIntro()">Couples Compatibility 💑</button>
+        </div>
+      </div>
     </div>
 
-    <div class="container">
-        <!-- Landing Page -->
-        <div id="landing" class="page active">
-            <div class="hero">
-                <div class="hero-badge">✨ Valentine's Special 2026</div>
-                <h1>Discover Your Perfect Valentine</h1>
-                <p class="hero-subtitle">
-                    Answer 10 questions to find your match<br>
-                    from popular characters across film, anime & fiction
-                </p>
-                <p class="hero-tagline">~where fate meets chaos~</p>
-                <div class="landing-buttons">
-                    <button class="cta-button" onclick="showGenderPage()">Find Your Match 💕</button>
-                    <button class="cta-button cta-secondary" onclick="showCouplesIntro()">Couples Compatibility 💑</button>
-                </div>
-            </div>
+    <!-- Couples Intro -->
+    <div id="couples-intro" class="page">
+      <div class="couples-section">
+        <h2 class="section-title">Couples Compatibility Check</h2>
+        <p class="section-subtitle">Both partners answer the same 10 questions. Pass the device between you—no peeking!
+        </p>
+        <div class="couples-instructions">
+          <div class="instruction-step">
+            <div class="step-number">1</div>
+            <p><strong>Partner 1</strong> answers first</p>
+          </div>
+          <div class="instruction-step">
+            <div class="step-number">2</div>
+            <p>Pass the device to <strong>Partner 2</strong></p>
+          </div>
+          <div class="instruction-step">
+            <div class="step-number">3</div>
+            <p>Discover your compatibility %</p>
+          </div>
         </div>
-
-        <!-- Couples Intro -->
-        <div id="couples-intro" class="page">
-            <div class="couples-section">
-                <h2 class="section-title">Couples Compatibility Check</h2>
-                <p class="section-subtitle">Both partners answer the same 10 questions. Pass the device between you—no peeking!</p>
-                <div class="couples-instructions">
-                    <div class="instruction-step">
-                        <div class="step-number">1</div>
-                        <p><strong>Partner 1</strong> answers first</p>
-                    </div>
-                    <div class="instruction-step">
-                        <div class="step-number">2</div>
-                        <p>Pass the device to <strong>Partner 2</strong></p>
-                    </div>
-                    <div class="instruction-step">
-                        <div class="step-number">3</div>
-                        <p>Discover your compatibility %</p>
-                    </div>
-                </div>
-                <button class="cta-button" onclick="startCouplesQuiz()">Let's Begin 💑</button>
-            </div>
-        </div>
-
-        <!-- Couples Quiz (Partner 1 & 2) -->
-        <div id="couples-quiz" class="page">
-            <div class="quiz-card">
-                <div class="couples-partner-badge" id="couplesPartnerBadge">Partner 1</div>
-                <div class="question-header">
-                    <div class="question-counter" id="couplesQuestionCounter">Question 1 of 10</div>
-                    <h2 class="question-text" id="couplesQuestionText"></h2>
-                </div>
-                <div class="options-grid" id="couplesOptionsGrid"></div>
-            </div>
-        </div>
-
-        <!-- Couples Loading -->
-        <div id="couples-loading" class="page">
-            <div class="loading-section">
-                <div class="loading-animation">
-                    <div class="loading-dot"></div>
-                    <div class="loading-dot"></div>
-                    <div class="loading-dot"></div>
-                </div>
-                <h2 class="loading-message">Calculating your compatibility...</h2>
-                <p class="loading-submessage">The universe is aligning your hearts ✨</p>
-            </div>
-        </div>
-
-        <!-- Couples Results -->
-        <div id="couples-results" class="page">
-            <div class="results-section">
-                <div class="compatibility-badge">You Two Are</div>
-                <div class="compatibility-score" id="couplesScoreDisplay">85%</div>
-                <p class="couples-score-label">Compatible</p>
-                <div class="character-profile couples-verdict-card">
-                    <div class="character-verdict" id="couplesVerdict">Verdict here</div>
-                </div>
-                <div class="action-grid">
-                    <button class="cta-button" onclick="shareCouplesResult()">💌 Share Result</button>
-                    <button class="action-button" onclick="resetCouplesQuiz()">🔄 Try Again</button>
-                    <button class="action-button" onclick="resetQuiz()">🏠 Home</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Gender Selection -->
-        <div id="gender" class="page">
-            <div class="gender-section">
-                <h2 class="section-title">Which path calls to you?</h2>
-                <p class="section-subtitle">Trust your instinct—there are no wrong answers, only possibilities</p>
-                <div class="gender-grid">
-                    <div class="gender-card" onclick="selectGender('male')">
-                        <div class="gender-label">Male</div>
-                        <div class="gender-sublabel">Explore this path</div>
-                    </div>
-                    <div class="gender-card" onclick="selectGender('female')">
-                        <div class="gender-label">Female</div>
-                        <div class="gender-sublabel">Explore this path</div>
-                    </div>
-                    <div class="gender-card" onclick="selectGender('any')">
-                        <div class="gender-label">Surprise me</div>
-                        <div class="gender-sublabel">Let fate decide</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Quiz -->
-        <div id="quiz" class="page">
-            <div class="quiz-card">
-                <div class="question-header">
-                    <div class="question-counter" id="questionCounter">Question 1 of 10</div>
-                    <h2 class="question-text" id="questionText"></h2>
-                </div>
-                <div class="options-grid" id="optionsGrid"></div>
-            </div>
-        </div>
-
-        <!-- Loading -->
-        <div id="loading" class="page">
-            <div class="loading-section">
-                <div class="loading-animation">
-                    <div class="loading-dot"></div>
-                    <div class="loading-dot"></div>
-                    <div class="loading-dot"></div>
-                </div>
-                <h2 class="loading-message" id="loadingMessage">Consulting the stars...</h2>
-                <p class="loading-submessage" id="loadingSubtext">This might take a moment</p>
-            </div>
-        </div>
-
-        <!-- Results -->
-        <div id="results" class="page">
-            <div class="results-section">
-                <div class="compatibility-badge">Perfect Match Found</div>
-                <div class="compatibility-score" id="scoreDisplay">96%</div>
-                
-                <div class="character-profile">
-                    <h3 class="character-name" id="characterName">Character Name</h3>
-                    <div class="character-tag" id="characterTag">Category</div>
-                    <p class="character-quote" id="characterQuote">"Quote here"</p>
-                    <p class="character-bio" id="characterBio">Bio here</p>
-                    <div class="character-verdict" id="characterVerdict">Verdict here</div>
-                </div>
-
-                <div class="action-grid">
-                    <button class="cta-button" onclick="shareResult()">💌 Share Result</button>
-                    <button class="action-button" onclick="resetQuiz()">🔄 Try Again</button>
-                    <button class="action-button" onclick="copyLink()">🔗 Copy Link</button>
-                </div>
-
-                <p class="easter-egg">✨ Only 3% of people get this exact match ✨</p>
-            </div>
-        </div>
+        <button class="cta-button" onclick="startCouplesQuiz()">Let's Begin 💑</button>
+      </div>
     </div>
 
-    <script>
-        // Character Database - popular characters
-        const characters = {
-            male: [
-                { name: "Shinchan Nohara", category: "Cartoon Legend", quote: "Life's too short to not eat chocolate!", bio: "Chaotic energy personified. Zero filter, maximum vibes. Loves snacks, naps, and embarrassing everyone in public. Surprisingly wise when you least expect it.", verdict: "You chose chaos. Chaos chose you back. 🍑" },
-                { name: "Nobita Nobi", category: "Dreamer", quote: "Maybe I'll do it tomorrow... or next week.", bio: "Professional napper and excuse-maker extraordinaire. Low ambition, high heart. Needs constant rescuing but somehow makes it endearing.", verdict: "You're dating pure potential. Unrealized, but potential. 💙" },
-                { name: "Doraemon", category: "Futuristic Friend", quote: "I have a gadget for everything!", bio: "Ultimate problem solver with 22nd-century tech. Loyal, caring, slightly judgmental of your life choices. Loves dorayaki more than anything.", verdict: "Your relationship literally needs future technology. 🤖" },
-                { name: "Raj Malhotra", category: "90s Romance", quote: "Tujhe dekha toh ye jaana sanam...", bio: "Peak golden retriever boyfriend. Will befriend your entire family, play guitar under your window, and make grand romantic gestures. Stuck in 1995.", verdict: "Your standards are based on a man from the 90s. Good luck. 🎸" },
-                { name: "Aman Mathur", category: "Tragic Hero", quote: "Zindagi lambi nahi, badi honi chahiye.", bio: "Will help you find love with someone else because he's dying. Ultimate self-sacrifice. Plays basketball in the rain and gives profound life advice.", verdict: "Emotionally compatible but cosmically doomed. 💔" },
-                { name: "Naruto Uzumaki", category: "Ninja Hero", quote: "Believe it! I never go back on my word!", bio: "Never gives up on anyone or anything. Believes in you more than you believe in yourself. Loud, loyal, lives for ramen. Will talk-no-jutsu your problems.", verdict: "Your valentine's power is the power of friendship. That's it. 🍜" },
-                { name: "Levi Ackerman", category: "Stoic Soldier", quote: "Clean your room before I do it for you.", bio: "Obsessive cleaner, emotionally unavailable, secretly cares. Short king with deadly skills. Will protect you fiercely but roast you first.", verdict: "You like them short, traumatized, and spotless. Valid. 🗡️" },
-                { name: "Light Yagami", category: "Genius Villain", quote: "I'll take a potato chip... and EAT IT!", bio: "Certified genius with god complex. Will use you in his master plan. Looks perfect, is definitely a psychopath. Peak aesthetic toxicity.", verdict: "You chose red flags documented in a Death Note. ⚠️" },
-                { name: "Spike Spiegel", category: "Space Cowboy", quote: "Whatever happens, happens.", bio: "Cool, detached, haunted by his past. Space cowboy with commitment issues. Will leave you for his tragic backstory.", verdict: "You're gonna carry that weight of being second choice. 🌙" },
-                { name: "Shah Rukh Khan", category: "King of Romance", quote: "Pyaar dosti hai.", bio: "Literal King of Romance. Opens arms dramatically in every country. Charming, successful, devoted. Basically a concept at this point.", verdict: "You matched with fantasy. SRK isn't real, he's an emotion. 👑" },
-                { name: "Ranveer Singh", category: "Energy Incarnate", quote: "Apna time aayega!", bio: "Unlimited chaotic energy. Questionable fashion, incredible hype-man energy. Golden retriever husband material. Zero chill, infinite love.", verdict: "You wanted excitement. You got a human firework. ⚡" },
-                { name: "Mr. Darcy", category: "Period Drama", quote: "You have bewitched me, body and soul.", bio: "Proud, awkward at feelings, secretly soft. Rich, reserved, terrible at first impressions. Will change for the right person.", verdict: "You like them emotionally constipated and wealthy. Fair. 💰" },
-                { name: "Virat Kohli", category: "Cricket Legend", quote: "Chase your dreams like I chase centuries!", bio: "Intensely competitive about everything. Will treat you like the World Cup trophy. Fitness obsessed, expects same dedication.", verdict: "More committed to his protein shake than anything. 💪" },
-                { name: "Oscar Wilde", category: "Literary Icon", quote: "I can resist everything except temptation.", bio: "Witty beyond belief, dramatic about everything. Will quote himself constantly. Every conversation is performance art.", verdict: "Your valentine is more dramatic than Broadway. 🎭" },
-                { name: "Gian (Takeshi)", category: "Lovable Bully", quote: "My singing will touch your heart!", bio: "Loud, confident, tone-deaf. Big heart under bully exterior. Will steal your food but protect you fiercely.", verdict: "You collect red flags like Pokemon cards. 🚩" },
-                { name: "Chandler Bing", category: "Sarcastic Sweetheart", quote: "Could I be any more into you?", bio: "Defense mechanism is sarcasm, heart is pure gold. Awkward with feelings, loyal to the end. Will make you laugh through the hard times.", verdict: "You want someone who roasts you but would take a bullet. Valid. ☕" },
-                { name: "Jim Halpert", category: "Office Romance", quote: "I'm sorry I wasn't enough for you.", bio: "Quietly devoted, prankster with a heart. Stares at you from across the room. Will do the grand gesture when it matters most.", verdict: "You want the slow burn. The look across the room. Done. 📎" },
-                { name: "Peeta Mellark", category: "Loyal Hero", quote: "I want to die as myself.", bio: "Gentle baker, fierce protector. Will pretend to be in love to save your life. Then actually fall in love. Bread. Always bread.", verdict: "You want someone who'd burn for you. Literally. 🍞" }
-            ],
-            female: [
-                { name: "Shizuka Minamoto", category: "The Standard", quote: "Kindness and respect aren't negotiable.", bio: "Kind, emotionally mature, talented. The standard everyone should aspire to. Violin skills unmatched, patience legendary.", verdict: "You weren't ready for this emotional intelligence. 👑" },
-                { name: "Poo (Simran)", category: "Main Character", quote: "It's all about loving yourself!", bio: "Peak main character energy. Expects grand gestures and European vacations. No chill, all vibes. Lives in a Karan Johar movie.", verdict: "Welcome to your Bollywood fantasy. Good luck. 💎" },
-                { name: "Geet Dhillon", category: "Chaos Personified", quote: "Main apni favourite hoon!", bio: "Talks non-stop, changes lives on train journeys. Chaotic good energy. Main character syndrome but lovable. Pure sunshine.", verdict: "You wanted adventure. You got a tornado. 🌪️" },
-                { name: "Naina Catherine Kapur", category: "Dreamer", quote: "Today is all we have!", bio: "Went from MBA serious to spontaneous adventurer. Journaling enthusiast with wild soul. Will drag you to beaches.", verdict: "You unlocked the 'good girl goes wild' arc. 🌊" },
-                { name: "Hinata Hyuga", category: "Quiet Strength", quote: "I never go back on my word!", bio: "Loyal to a fault, will fight for you. Shy but deadly. Quiet strength, pure heart. Deserved so much better than canon.", verdict: "You got the sweetest soul. Don't mess this up. 💜" },
-                { name: "Mikasa Ackerman", category: "Warrior", quote: "If I can't protect you, what's the point?", bio: "Fiercely protective warrior. Will fight titans for you. Loyal, strong, emotionally closed. Actions over words, always.", verdict: "She'll defend you. She won't discuss feelings. Ever. 🛡️" },
-                { name: "Faye Valentine", category: "Space Rebel", quote: "Easy come, easy go.", bio: "Sassy, independent, perpetually broke but glamorous. Trust issues for valid reasons. Peak 'steal your heart and ship' energy.", verdict: "She's out of your league. Literally and financially. 🎰" },
-                { name: "Deepika Padukone", category: "Global Icon", quote: "Mental health matters.", bio: "Gorgeous, talented, mental health advocate. Will outshine you in every photo. Probably too good for anyone.", verdict: "Geographically and romantically impossible. ✨" },
-                { name: "Priyanka Chopra", category: "Global Queen", quote: "Don't be the girl who fell. Get back up.", bio: "Conquered Bollywood AND Hollywood. Confident, ambitious, in different time zones. Will inspire your entire life.", verdict: "She has a better life than you. Work harder. 🌍" },
-                { name: "Jane Austen", category: "Literary Legend", quote: "There is no charm equal to tenderness of heart.", bio: "Witty observer, subtle roast master. Expects intelligent conversation and slow-burn romance. Books over everything.", verdict: "Period drama life now. Hope you like corsets. 📚" },
-                { name: "Sylvia Plath", category: "Poetic Soul", quote: "I am terrified by this dark thing in me.", bio: "Intensely poetic, emotionally profound. Writes about you in ways that hurt beautifully. Expect 2 AM existential talks.", verdict: "You're dating poetry. Beautiful and terrifying. 🌙" },
-                { name: "Elizabeth Bennet", category: "Sharp Wit", quote: "I will act in a manner that constitutes my happiness.", bio: "Smart, witty, takes zero nonsense. Will roast you if deserved. Expects equal partnership and intelligent banter.", verdict: "She has standards. Be very nervous. 💍" },
-                { name: "Hermione Granger", category: "Brightest Witch", quote: "Books and cleverness!", bio: "Brilliant beyond measure. Will do homework and save the world. Organized, prepared, has plans for everything.", verdict: "She's smarter. Everyone knows it. Especially her. 📖" },
-                { name: "Kat Stratford", category: "90s Icon", quote: "I don't do what people expect.", bio: "Feminist icon, indie music lover. Doesn't care what you think. Sharp tongue, secretly soft heart.", verdict: "She's cooler than you. Always was, always will be. 🎸" },
-                { name: "Moana", category: "Ocean Explorer", quote: "I am Moana!", bio: "Brave explorer, destined for greatness. Doesn't need saving. Will sail oceans to save her people.", verdict: "She'll save the world. You can tag along. 🌊" },
-                { name: "Rachel Green", category: "Friends Icon", quote: "I got off the plane.", bio: "Started as a runaway bride, became a fashion legend. Messy, lovable, growth arc of the century. Will steal your cheesecake.", verdict: "You want the character development. And the hair. 💇‍♀️" },
-                { name: "Monica Geller", category: "Type A Queen", quote: "I know!", bio: "Obsessively organized, fiercely competitive, feeds everyone. Will clean your apartment and plan your life. High maintenance, high reward.", verdict: "You want someone who has a drawer for everything. Respect. 🧹" }
-            ]
-        };
+    <!-- Couples Quiz (Partner 1 & 2) -->
+    <div id="couples-quiz" class="page">
+      <div class="quiz-card">
+        <div class="couples-partner-badge" id="couplesPartnerBadge">Partner 1</div>
+        <div class="question-header">
+          <div class="question-counter" id="couplesQuestionCounter">Question 1 of 10</div>
+          <h2 class="question-text" id="couplesQuestionText"></h2>
+        </div>
+        <div class="options-grid" id="couplesOptionsGrid"></div>
+      </div>
+    </div>
 
-        const questions = [
-            { question: "What's your ideal way to spend a Saturday?", options: ["Adventuring outdoors - hiking, exploring new places", "Cozy at home with books, movies, or creative projects", "Social butterfly mode - brunch, shopping, seeing people", "Productive hustle - gym, errands, getting things done"] },
-            { question: "How do you handle conflict in relationships?", options: ["Direct conversation - let's talk it out immediately", "Need space first, then discuss when calm", "Avoid it until it goes away (it never goes away)", "Passive aggressive comments until someone breaks"] },
-            { question: "What's your love language?", options: ["Words of affirmation - tell me you love me constantly", "Quality time - just be present with me", "Physical touch - hugs, cuddles, hand-holding", "Acts of service - do things that make my life easier"] },
-            { question: "Pick your biggest relationship red flag:", options: ["Emotionally unavailable but mysteriously attractive", "Too clingy and needs constant reassurance", "Flaky and unreliable but super fun", "Overly critical but 'just being honest'"] },
-            { question: "What's your texting style?", options: ["Immediate responses, always available", "Take my time, respond when I feel like it", "Paragraphs and essays about everything", "Memes. Just memes. Communication through memes."] },
-            { question: "Ideal first date?", options: ["Classic dinner and deep conversation", "Fun activity - arcade, mini golf, something playful", "Cultural experience - museum, art show, concert", "Casual coffee to see if there's chemistry first"] },
-            { question: "What matters most to you in a partner?", options: ["Emotional intelligence and communication", "Ambition and drive for success", "Humor and ability to make me laugh", "Loyalty and unwavering support"] },
-            { question: "How do you show you care?", options: ["Plan thoughtful surprises and gestures", "Listen and remember small details", "Physical affection and constant contact", "Help solve problems and offer advice"] },
-            { question: "What's your approach to commitment?", options: ["All in from the start, no games", "Slow and steady, need to be sure", "Terrified but willing to try", "What even is commitment? *nervous laughter*"] },
-            { question: "Deal-breaker you'd absolutely ignore?", options: ["They're messy/disorganized but fun", "Workaholic with no work-life balance", "Has emotional baggage from past relationships", "Different life goals but amazing chemistry"] }
-        ];
+    <!-- Couples Loading -->
+    <div id="couples-loading" class="page">
+      <div class="loading-section">
+        <div class="loading-animation">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+        <h2 class="loading-message">Calculating your compatibility...</h2>
+        <p class="loading-submessage">The universe is aligning your hearts ✨</p>
+      </div>
+    </div>
 
-        let currentQuestion = 0;
-        let answers = [];
-        let selectedGender = 'any';
+    <!-- Couples Results -->
+    <div id="couples-results" class="page">
+      <div class="results-section">
+        <div class="compatibility-badge">You Two Are</div>
+        <div class="compatibility-score" id="couplesScoreDisplay">85%</div>
+        <p class="couples-score-label">Compatible</p>
+        <div class="character-profile couples-verdict-card">
+          <div class="character-verdict" id="couplesVerdict">Verdict here</div>
+        </div>
+        <div class="action-grid">
+          <button class="cta-button" onclick="shareCouplesResult()">💌 Share Result</button>
+          <button class="action-button" onclick="resetCouplesQuiz()">🔄 Try Again</button>
+          <button class="action-button" onclick="resetQuiz()">🏠 Home</button>
+        </div>
+      </div>
+    </div>
 
-        // Couples mode
-        let partner1Answers = [];
-        let partner2Answers = [];
-        let couplesCurrentPartner = 1;
-        let couplesCurrentQuestion = 0;
+    <!-- Gender Selection -->
+    <div id="gender" class="page">
+      <div class="gender-section">
+        <h2 class="section-title">Which path calls to you?</h2>
+        <p class="section-subtitle">Trust your instinct—there are no wrong answers, only possibilities</p>
+        <div class="gender-grid">
+          <div class="gender-card" onclick="selectGender('male')">
+            <div class="gender-label">Male</div>
+            <div class="gender-sublabel">Explore this path</div>
+          </div>
+          <div class="gender-card" onclick="selectGender('female')">
+            <div class="gender-label">Female</div>
+            <div class="gender-sublabel">Explore this path</div>
+          </div>
+          <div class="gender-card" onclick="selectGender('any')">
+            <div class="gender-label">Surprise me</div>
+            <div class="gender-sublabel">Let fate decide</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-        const couplesVerdicts = [
-            { min: 0, max: 30, text: "Opposites attract... or do they? You keep each other on your toes! 💫" },
-            { min: 31, max: 50, text: "You're different in all the right ways. Growth through contrast! 🌱" },
-            { min: 51, max: 70, text: "Solid foundation with room to grow. Your differences add spice! 🌶️" },
-            { min: 71, max: 85, text: "You're in sync. Same wavelength, same vibes. Couple goals! 💕" },
-            { min: 86, max: 95, text: "Mind-reading level compatibility. Are you sure you're not the same person? ✨" },
-            { min: 96, max: 100, text: "Soulmate tier. Fate aligned for you two. Forever energy! 💘" }
-        ];
+    <!-- Quiz -->
+    <div id="quiz" class="page">
+      <div class="quiz-card">
+        <div class="question-header">
+          <div class="question-counter" id="questionCounter">Question 1 of 10</div>
+          <h2 class="question-text" id="questionText"></h2>
+        </div>
+        <div class="options-grid" id="optionsGrid"></div>
+      </div>
+    </div>
 
-        function generateHearts() {
-            const container = document.getElementById('heartsBg');
-            const hearts = ['💗', '💕', '💖', '💝', '💓', '💘'];
-            for (let i = 0; i < 20; i++) {
-                const heart = document.createElement('div');
-                heart.className = 'floating-heart';
-                heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
-                heart.style.left = Math.random() * 100 + '%';
-                heart.style.animationDuration = (Math.random() * 8 + 12) + 's';
-                heart.style.animationDelay = Math.random() * 8 + 's';
-                heart.style.fontSize = (Math.random() * 16 + 16) + 'px';
-                container.appendChild(heart);
-            }
+    <!-- Loading -->
+    <div id="loading" class="page">
+      <div class="loading-section">
+        <div class="loading-animation">
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+          <div class="loading-dot"></div>
+        </div>
+        <h2 class="loading-message" id="loadingMessage">Consulting the stars...</h2>
+        <p class="loading-submessage" id="loadingSubtext">This might take a moment</p>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="results" class="page">
+      <div class="results-section">
+        <div class="compatibility-badge">Perfect Match Found</div>
+        <div class="compatibility-score" id="scoreDisplay">96%</div>
+
+        <div class="character-profile">
+          <h3 class="character-name" id="characterName">Character Name</h3>
+          <div class="character-tag" id="characterTag">Category</div>
+          <p class="character-quote" id="characterQuote">"Quote here"</p>
+          <p class="character-bio" id="characterBio">Bio here</p>
+          <div class="character-verdict" id="characterVerdict">Verdict here</div>
+        </div>
+
+        <div class="action-grid">
+          <button class="cta-button" onclick="shareResult()">💌 Share Result</button>
+          <button class="action-button" onclick="resetQuiz()">🔄 Try Again</button>
+          <button class="action-button" onclick="copyLink()">🔗 Copy Link</button>
+        </div>
+
+        <p class="easter-egg">✨ Only 3% of people get this exact match ✨</p>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Character Database - popular characters
+    const characters = {
+      male: [{
+        name: "Shinchan Nohara",
+        category: "Cartoon Legend",
+        quote: "Life's too short to not eat chocolate!",
+        bio: "Chaotic energy personified. Zero filter, maximum vibes. Loves snacks, naps, and embarrassing everyone in public. Surprisingly wise when you least expect it.",
+        verdict: "You chose chaos. Chaos chose you back. 🍑"
+      },
+      {
+        name: "Nobita Nobi",
+        category: "Dreamer",
+        quote: "Maybe I'll do it tomorrow... or next week.",
+        bio: "Professional napper and excuse-maker extraordinaire. Low ambition, high heart. Needs constant rescuing but somehow makes it endearing.",
+        verdict: "You're dating pure potential. Unrealized, but potential. 💙"
+      },
+      {
+        name: "Doraemon",
+        category: "Futuristic Friend",
+        quote: "I have a gadget for everything!",
+        bio: "Ultimate problem solver with 22nd-century tech. Loyal, caring, slightly judgmental of your life choices. Loves dorayaki more than anything.",
+        verdict: "Your relationship literally needs future technology. 🤖"
+      },
+      {
+        name: "Raj Malhotra",
+        category: "90s Romance",
+        quote: "Tujhe dekha toh ye jaana sanam...",
+        bio: "Peak golden retriever boyfriend. Will befriend your entire family, play guitar under your window, and make grand romantic gestures. Stuck in 1995.",
+        verdict: "Your standards are based on a man from the 90s. Good luck. 🎸"
+      },
+      {
+        name: "Aman Mathur",
+        category: "Tragic Hero",
+        quote: "Zindagi lambi nahi, badi honi chahiye.",
+        bio: "Will help you find love with someone else because he's dying. Ultimate self-sacrifice. Plays basketball in the rain and gives profound life advice.",
+        verdict: "Emotionally compatible but cosmically doomed. 💔"
+      },
+      {
+        name: "Naruto Uzumaki",
+        category: "Ninja Hero",
+        quote: "Believe it! I never go back on my word!",
+        bio: "Never gives up on anyone or anything. Believes in you more than you believe in yourself. Loud, loyal, lives for ramen. Will talk-no-jutsu your problems.",
+        verdict: "Your valentine's power is the power of friendship. That's it. 🍜"
+      },
+      {
+        name: "Levi Ackerman",
+        category: "Stoic Soldier",
+        quote: "Clean your room before I do it for you.",
+        bio: "Obsessive cleaner, emotionally unavailable, secretly cares. Short king with deadly skills. Will protect you fiercely but roast you first.",
+        verdict: "You like them short, traumatized, and spotless. Valid. 🗡️"
+      },
+      {
+        name: "Light Yagami",
+        category: "Genius Villain",
+        quote: "I'll take a potato chip... and EAT IT!",
+        bio: "Certified genius with god complex. Will use you in his master plan. Looks perfect, is definitely a psychopath. Peak aesthetic toxicity.",
+        verdict: "You chose red flags documented in a Death Note. ⚠️"
+      },
+      {
+        name: "Spike Spiegel",
+        category: "Space Cowboy",
+        quote: "Whatever happens, happens.",
+        bio: "Cool, detached, haunted by his past. Space cowboy with commitment issues. Will leave you for his tragic backstory.",
+        verdict: "You're gonna carry that weight of being second choice. 🌙"
+      },
+      {
+        name: "Shah Rukh Khan",
+        category: "King of Romance",
+        quote: "Pyaar dosti hai.",
+        bio: "Literal King of Romance. Opens arms dramatically in every country. Charming, successful, devoted. Basically a concept at this point.",
+        verdict: "You matched with fantasy. SRK isn't real, he's an emotion. 👑"
+      },
+      {
+        name: "Ranveer Singh",
+        category: "Energy Incarnate",
+        quote: "Apna time aayega!",
+        bio: "Unlimited chaotic energy. Questionable fashion, incredible hype-man energy. Golden retriever husband material. Zero chill, infinite love.",
+        verdict: "You wanted excitement. You got a human firework. ⚡"
+      },
+      {
+        name: "Mr. Darcy",
+        category: "Period Drama",
+        quote: "You have bewitched me, body and soul.",
+        bio: "Proud, awkward at feelings, secretly soft. Rich, reserved, terrible at first impressions. Will change for the right person.",
+        verdict: "You like them emotionally constipated and wealthy. Fair. 💰"
+      },
+      {
+        name: "Virat Kohli",
+        category: "Cricket Legend",
+        quote: "Chase your dreams like I chase centuries!",
+        bio: "Intensely competitive about everything. Will treat you like the World Cup trophy. Fitness obsessed, expects same dedication.",
+        verdict: "More committed to his protein shake than anything. 💪"
+      },
+      {
+        name: "Oscar Wilde",
+        category: "Literary Icon",
+        quote: "I can resist everything except temptation.",
+        bio: "Witty beyond belief, dramatic about everything. Will quote himself constantly. Every conversation is performance art.",
+        verdict: "Your valentine is more dramatic than Broadway. 🎭"
+      },
+      {
+        name: "Gian (Takeshi)",
+        category: "Lovable Bully",
+        quote: "My singing will touch your heart!",
+        bio: "Loud, confident, tone-deaf. Big heart under bully exterior. Will steal your food but protect you fiercely.",
+        verdict: "You collect red flags like Pokemon cards. 🚩"
+      },
+      {
+        name: "Chandler Bing",
+        category: "Sarcastic Sweetheart",
+        quote: "Could I be any more into you?",
+        bio: "Defense mechanism is sarcasm, heart is pure gold. Awkward with feelings, loyal to the end. Will make you laugh through the hard times.",
+        verdict: "You want someone who roasts you but would take a bullet. Valid. ☕"
+      },
+      {
+        name: "Jim Halpert",
+        category: "Office Romance",
+        quote: "I'm sorry I wasn't enough for you.",
+        bio: "Quietly devoted, prankster with a heart. Stares at you from across the room. Will do the grand gesture when it matters most.",
+        verdict: "You want the slow burn. The look across the room. Done. 📎"
+      },
+      {
+        name: "Peeta Mellark",
+        category: "Loyal Hero",
+        quote: "I want to die as myself.",
+        bio: "Gentle baker, fierce protector. Will pretend to be in love to save your life. Then actually fall in love. Bread. Always bread.",
+        verdict: "You want someone who'd burn for you. Literally. 🍞"
+      }
+      ],
+      female: [{
+        name: "Shizuka Minamoto",
+        category: "The Standard",
+        quote: "Kindness and respect aren't negotiable.",
+        bio: "Kind, emotionally mature, talented. The standard everyone should aspire to. Violin skills unmatched, patience legendary.",
+        verdict: "You weren't ready for this emotional intelligence. 👑"
+      },
+      {
+        name: "Poo (Simran)",
+        category: "Main Character",
+        quote: "It's all about loving yourself!",
+        bio: "Peak main character energy. Expects grand gestures and European vacations. No chill, all vibes. Lives in a Karan Johar movie.",
+        verdict: "Welcome to your Bollywood fantasy. Good luck. 💎"
+      },
+      {
+        name: "Geet Dhillon",
+        category: "Chaos Personified",
+        quote: "Main apni favourite hoon!",
+        bio: "Talks non-stop, changes lives on train journeys. Chaotic good energy. Main character syndrome but lovable. Pure sunshine.",
+        verdict: "You wanted adventure. You got a tornado. 🌪️"
+      },
+      {
+        name: "Naina Catherine Kapur",
+        category: "Dreamer",
+        quote: "Today is all we have!",
+        bio: "Went from MBA serious to spontaneous adventurer. Journaling enthusiast with wild soul. Will drag you to beaches.",
+        verdict: "You unlocked the 'good girl goes wild' arc. 🌊"
+      },
+      {
+        name: "Hinata Hyuga",
+        category: "Quiet Strength",
+        quote: "I never go back on my word!",
+        bio: "Loyal to a fault, will fight for you. Shy but deadly. Quiet strength, pure heart. Deserved so much better than canon.",
+        verdict: "You got the sweetest soul. Don't mess this up. 💜"
+      },
+      {
+        name: "Mikasa Ackerman",
+        category: "Warrior",
+        quote: "If I can't protect you, what's the point?",
+        bio: "Fiercely protective warrior. Will fight titans for you. Loyal, strong, emotionally closed. Actions over words, always.",
+        verdict: "She'll defend you. She won't discuss feelings. Ever. 🛡️"
+      },
+      {
+        name: "Faye Valentine",
+        category: "Space Rebel",
+        quote: "Easy come, easy go.",
+        bio: "Sassy, independent, perpetually broke but glamorous. Trust issues for valid reasons. Peak 'steal your heart and ship' energy.",
+        verdict: "She's out of your league. Literally and financially. 🎰"
+      },
+      {
+        name: "Deepika Padukone",
+        category: "Global Icon",
+        quote: "Mental health matters.",
+        bio: "Gorgeous, talented, mental health advocate. Will outshine you in every photo. Probably too good for anyone.",
+        verdict: "Geographically and romantically impossible. ✨"
+      },
+      {
+        name: "Priyanka Chopra",
+        category: "Global Queen",
+        quote: "Don't be the girl who fell. Get back up.",
+        bio: "Conquered Bollywood AND Hollywood. Confident, ambitious, in different time zones. Will inspire your entire life.",
+        verdict: "She has a better life than you. Work harder. 🌍"
+      },
+      {
+        name: "Jane Austen",
+        category: "Literary Legend",
+        quote: "There is no charm equal to tenderness of heart.",
+        bio: "Witty observer, subtle roast master. Expects intelligent conversation and slow-burn romance. Books over everything.",
+        verdict: "Period drama life now. Hope you like corsets. 📚"
+      },
+      {
+        name: "Sylvia Plath",
+        category: "Poetic Soul",
+        quote: "I am terrified by this dark thing in me.",
+        bio: "Intensely poetic, emotionally profound. Writes about you in ways that hurt beautifully. Expect 2 AM existential talks.",
+        verdict: "You're dating poetry. Beautiful and terrifying. 🌙"
+      },
+      {
+        name: "Elizabeth Bennet",
+        category: "Sharp Wit",
+        quote: "I will act in a manner that constitutes my happiness.",
+        bio: "Smart, witty, takes zero nonsense. Will roast you if deserved. Expects equal partnership and intelligent banter.",
+        verdict: "She has standards. Be very nervous. 💍"
+      },
+      {
+        name: "Hermione Granger",
+        category: "Brightest Witch",
+        quote: "Books and cleverness!",
+        bio: "Brilliant beyond measure. Will do homework and save the world. Organized, prepared, has plans for everything.",
+        verdict: "She's smarter. Everyone knows it. Especially her. 📖"
+      },
+      {
+        name: "Kat Stratford",
+        category: "90s Icon",
+        quote: "I don't do what people expect.",
+        bio: "Feminist icon, indie music lover. Doesn't care what you think. Sharp tongue, secretly soft heart.",
+        verdict: "She's cooler than you. Always was, always will be. 🎸"
+      },
+      {
+        name: "Moana",
+        category: "Ocean Explorer",
+        quote: "I am Moana!",
+        bio: "Brave explorer, destined for greatness. Doesn't need saving. Will sail oceans to save her people.",
+        verdict: "She'll save the world. You can tag along. 🌊"
+      },
+      {
+        name: "Rachel Green",
+        category: "Friends Icon",
+        quote: "I got off the plane.",
+        bio: "Started as a runaway bride, became a fashion legend. Messy, lovable, growth arc of the century. Will steal your cheesecake.",
+        verdict: "You want the character development. And the hair. 💇♀️"
+      },
+      {
+        name: "Monica Geller",
+        category: "Type A Queen",
+        quote: "I know!",
+        bio: "Obsessively organized, fiercely competitive, feeds everyone. Will clean your apartment and plan your life. High maintenance, high reward.",
+        verdict: "You want someone who has a drawer for everything. Respect. 🧹"
+      }
+      ]
+    };
+
+    const questions = [{
+      question: "What's your ideal way to spend a Saturday?",
+      options: ["Adventuring outdoors - hiking, exploring new places", "Cozy at home with books, movies, or creative projects", "Social butterfly mode - brunch, shopping, seeing people", "Productive hustle - gym, errands, getting things done"]
+    },
+    {
+      question: "How do you handle conflict in relationships?",
+      options: ["Direct conversation - let's talk it out immediately", "Need space first, then discuss when calm", "Avoid it until it goes away (it never goes away)", "Passive aggressive comments until someone breaks"]
+    },
+    {
+      question: "What's your love language?",
+      options: ["Words of affirmation - tell me you love me constantly", "Quality time - just be present with me", "Physical touch - hugs, cuddles, hand-holding", "Acts of service - do things that make my life easier"]
+    },
+    {
+      question: "Pick your biggest relationship red flag:",
+      options: ["Emotionally unavailable but mysteriously attractive", "Too clingy and needs constant reassurance", "Flaky and unreliable but super fun", "Overly critical but 'just being honest'"]
+    },
+    {
+      question: "What's your texting style?",
+      options: ["Immediate responses, always available", "Take my time, respond when I feel like it", "Paragraphs and essays about everything", "Memes. Just memes. Communication through memes."]
+    },
+    {
+      question: "Ideal first date?",
+      options: ["Classic dinner and deep conversation", "Fun activity - arcade, mini golf, something playful", "Cultural experience - museum, art show, concert", "Casual coffee to see if there's chemistry first"]
+    },
+    {
+      question: "What matters most to you in a partner?",
+      options: ["Emotional intelligence and communication", "Ambition and drive for success", "Humor and ability to make me laugh", "Loyalty and unwavering support"]
+    },
+    {
+      question: "How do you show you care?",
+      options: ["Plan thoughtful surprises and gestures", "Listen and remember small details", "Physical affection and constant contact", "Help solve problems and offer advice"]
+    },
+    {
+      question: "What's your approach to commitment?",
+      options: ["All in from the start, no games", "Slow and steady, need to be sure", "Terrified but willing to try", "What even is commitment? *nervous laughter*"]
+    },
+    {
+      question: "Deal-breaker you'd absolutely ignore?",
+      options: ["They're messy/disorganized but fun", "Workaholic with no work-life balance", "Has emotional baggage from past relationships", "Different life goals but amazing chemistry"]
+    }
+    ];
+
+    let currentQuestion = 0;
+    let answers = [];
+    let selectedGender = 'any';
+
+    // Couples mode
+    let partner1Answers = [];
+    let partner2Answers = [];
+    let couplesCurrentPartner = 1;
+    let couplesCurrentQuestion = 0;
+
+    const couplesVerdicts = [{
+      min: 0,
+      max: 30,
+      text: "Opposites attract... or do they? You keep each other on your toes! 💫"
+    },
+    {
+      min: 31,
+      max: 50,
+      text: "You're different in all the right ways. Growth through contrast! 🌱"
+    },
+    {
+      min: 51,
+      max: 70,
+      text: "Solid foundation with room to grow. Your differences add spice! 🌶️"
+    },
+    {
+      min: 71,
+      max: 85,
+      text: "You're in sync. Same wavelength, same vibes. Couple goals! 💕"
+    },
+    {
+      min: 86,
+      max: 95,
+      text: "Mind-reading level compatibility. Are you sure you're not the same person? ✨"
+    },
+    {
+      min: 96,
+      max: 100,
+      text: "Soulmate tier. Fate aligned for you two. Forever energy! 💘"
+    }
+    ];
+
+    function generateHearts() {
+      const container = document.getElementById('heartsBg');
+      const hearts = ['💗', '💕', '💖', '💝', '💓', '💘'];
+      for (let i = 0; i < 20; i++) {
+        const heart = document.createElement('div');
+        heart.className = 'floating-heart';
+        heart.textContent = hearts[Math.floor(Math.random() * hearts.length)];
+        heart.style.left = Math.random() * 100 + '%';
+        heart.style.animationDuration = (Math.random() * 8 + 12) + 's';
+        heart.style.animationDelay = Math.random() * 8 + 's';
+        heart.style.fontSize = (Math.random() * 16 + 16) + 'px';
+        container.appendChild(heart);
+      }
+    }
+
+    function updateProgress(step) {
+      const hearts = document.querySelectorAll('.progress-heart');
+      hearts.forEach((heart, index) => {
+        if (index < step) {
+          heart.textContent = '💖';
+          heart.classList.add('filled');
+        } else {
+          heart.textContent = '🤍';
+          heart.classList.remove('filled');
         }
+      });
+    }
 
-        function updateProgress(step) {
-            const hearts = document.querySelectorAll('.progress-heart');
-            hearts.forEach((heart, index) => {
-                if (index < step) {
-                    heart.textContent = '💖';
-                    heart.classList.add('filled');
-                } else {
-                    heart.textContent = '🤍';
-                    heart.classList.remove('filled');
-                }
-            });
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      const progressBar = document.getElementById('progressBar');
+      const isQuizActive = pageId === 'quiz' || pageId === 'couples-quiz';
+      if (isQuizActive) {
+        progressBar.classList.add('active');
+        document.body.classList.add('quiz-active');
+      } else {
+        progressBar.classList.remove('active');
+        document.body.classList.remove('quiz-active');
+      }
+      // Toggle Dribbble video background (landing only)
+      if (pageId === 'landing') {
+        document.body.classList.add('landing-active');
+      } else {
+        document.body.classList.remove('landing-active');
+      }
+    }
+
+    function showGenderPage() {
+      showPage('gender');
+    }
+
+    function selectGender(gender) {
+      selectedGender = gender;
+      startQuiz();
+    }
+
+    function startQuiz() {
+      currentQuestion = 0;
+      answers = [];
+      showPage('quiz');
+      displayQuestion();
+      updateProgress(1);
+    }
+
+    function displayQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById('questionCounter').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+      document.getElementById('questionText').textContent = q.question;
+      const grid = document.getElementById('optionsGrid');
+      grid.innerHTML = '';
+      q.options.forEach((option, index) => {
+        const card = document.createElement('div');
+        card.className = 'option-card';
+        card.textContent = option;
+        card.onclick = () => selectOption(index, card);
+        grid.appendChild(card);
+      });
+      updateProgress(currentQuestion + 1);
+    }
+
+    function selectOption(index, element) {
+      answers.push(index);
+      document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
+      element.classList.add('selected');
+      setTimeout(() => {
+        if (currentQuestion < questions.length - 1) {
+          currentQuestion++;
+          displayQuestion();
+        } else {
+          showLoading();
         }
+      }, 600);
+    }
 
-        function showPage(pageId) {
-            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
-            document.getElementById(pageId).classList.add('active');
-            const progressBar = document.getElementById('progressBar');
-            const isQuizActive = pageId === 'quiz' || pageId === 'couples-quiz';
-            if (isQuizActive) {
-                progressBar.classList.add('active');
-                document.body.classList.add('quiz-active');
-            } else {
-                progressBar.classList.remove('active');
-                document.body.classList.remove('quiz-active');
-            }
-            // Toggle Dribbble video background (landing only)
-            if (pageId === 'landing') {
-                document.body.classList.add('landing-active');
-            } else {
-                document.body.classList.remove('landing-active');
-            }
+    function showLoading() {
+      showPage('loading');
+      const messages = ["Consulting the stars...", "Reading your energy...", "Matching heart frequencies...", "Analyzing compatibility...", "Finding your perfect match..."];
+      let index = 0;
+      const interval = setInterval(() => {
+        if (index < messages.length) {
+          document.getElementById('loadingMessage').textContent = messages[index];
+          document.getElementById('loadingSubtext').textContent = '✨'.repeat(index + 1);
+          index++;
+        } else {
+          clearInterval(interval);
         }
+      }, 800);
+      setTimeout(() => {
+        clearInterval(interval);
+        showResults();
+      }, 4500);
+    }
 
-        function showGenderPage() {
-            showPage('gender');
-        }
+    function showResults() {
+      let pool = selectedGender === 'male' ? characters.male :
+        selectedGender === 'female' ? characters.female :
+          [...characters.male, ...characters.female];
+      const character = pool[Math.floor(Math.random() * pool.length)];
+      const score = Math.floor(Math.random() * 12) + 88;
 
-        function selectGender(gender) {
-            selectedGender = gender;
-            startQuiz();
-        }
+      document.getElementById('scoreDisplay').textContent = score + '%';
+      document.getElementById('characterName').textContent = character.name;
+      document.getElementById('characterTag').textContent = character.category;
+      document.getElementById('characterQuote').textContent = `"${character.quote}"`;
+      document.getElementById('characterBio').textContent = character.bio;
+      document.getElementById('characterVerdict').textContent = character.verdict;
 
-        function startQuiz() {
-            currentQuestion = 0;
-            answers = [];
-            showPage('quiz');
-            displayQuestion();
-            updateProgress(1);
-        }
+      showPage('results');
+    }
 
-        function displayQuestion() {
-            const q = questions[currentQuestion];
-            document.getElementById('questionCounter').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
-            document.getElementById('questionText').textContent = q.question;
-            const grid = document.getElementById('optionsGrid');
-            grid.innerHTML = '';
-            q.options.forEach((option, index) => {
-                const card = document.createElement('div');
-                card.className = 'option-card';
-                card.textContent = option;
-                card.onclick = () => selectOption(index, card);
-                grid.appendChild(card);
-            });
-            updateProgress(currentQuestion + 1);
-        }
+    function shareResult() {
+      const name = document.getElementById('characterName').textContent;
+      const score = document.getElementById('scoreDisplay').textContent;
+      const text = `💘 I got ${name} with ${score} compatibility on the Valentine's Matcher!\n\nFind your perfect match: ${window.location.href}`;
+      if (navigator.share) {
+        navigator.share({
+          title: 'Valentine\'s Matcher',
+          text: text
+        }).catch(() => copyToClipboard(text));
+      } else {
+        copyToClipboard(text);
+      }
+    }
 
-        function selectOption(index, element) {
-            answers.push(index);
-            document.querySelectorAll('.option-card').forEach(card => card.classList.remove('selected'));
-            element.classList.add('selected');
-            setTimeout(() => {
-                if (currentQuestion < questions.length - 1) {
-                    currentQuestion++;
-                    displayQuestion();
-                } else {
-                    showLoading();
-                }
-            }, 600);
-        }
+    function copyLink() {
+      copyToClipboard(window.location.href);
+    }
 
-        function showLoading() {
-            showPage('loading');
-            const messages = ["Consulting the stars...", "Reading your energy...", "Matching heart frequencies...", "Analyzing compatibility...", "Finding your perfect match..."];
-            let index = 0;
-            const interval = setInterval(() => {
-                if (index < messages.length) {
-                    document.getElementById('loadingMessage').textContent = messages[index];
-                    document.getElementById('loadingSubtext').textContent = '✨'.repeat(index + 1);
-                    index++;
-                } else {
-                    clearInterval(interval);
-                }
-            }, 800);
-            setTimeout(() => {
-                clearInterval(interval);
-                showResults();
-            }, 4500);
-        }
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('💕 Copied to clipboard! Share with friends!');
+      }).catch(() => {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        alert('💕 Copied to clipboard!');
+      });
+    }
 
-        function showResults() {
-            let pool = selectedGender === 'male' ? characters.male :
-                       selectedGender === 'female' ? characters.female :
-                       [...characters.male, ...characters.female];
-            const character = pool[Math.floor(Math.random() * pool.length)];
-            const score = Math.floor(Math.random() * 12) + 88;
+    function resetQuiz() {
+      currentQuestion = 0;
+      answers = [];
+      selectedGender = 'any';
+      partner1Answers = [];
+      partner2Answers = [];
+      couplesCurrentPartner = 1;
+      couplesCurrentQuestion = 0;
+      showPage('landing');
+    }
 
-            document.getElementById('scoreDisplay').textContent = score + '%';
-            document.getElementById('characterName').textContent = character.name;
-            document.getElementById('characterTag').textContent = character.category;
-            document.getElementById('characterQuote').textContent = `"${character.quote}"`;
-            document.getElementById('characterBio').textContent = character.bio;
-            document.getElementById('characterVerdict').textContent = character.verdict;
+    function showCouplesIntro() {
+      partner1Answers = [];
+      partner2Answers = [];
+      couplesCurrentPartner = 1;
+      couplesCurrentQuestion = 0;
+      showPage('couples-intro');
+    }
 
-            showPage('results');
-        }
+    function startCouplesQuiz() {
+      couplesCurrentPartner = 1;
+      couplesCurrentQuestion = 0;
+      showPage('couples-quiz');
+      updateProgress(1);
+      displayCouplesQuestion();
+    }
 
-        function shareResult() {
-            const name = document.getElementById('characterName').textContent;
-            const score = document.getElementById('scoreDisplay').textContent;
-            const text = `💘 I got ${name} with ${score} compatibility on the Valentine's Matcher!\n\nFind your perfect match: ${window.location.href}`;
-            if (navigator.share) {
-                navigator.share({ title: 'Valentine\'s Matcher', text: text }).catch(() => copyToClipboard(text));
-            } else {
-                copyToClipboard(text);
-            }
-        }
+    function displayCouplesQuestion() {
+      const q = questions[couplesCurrentQuestion];
+      document.getElementById('couplesPartnerBadge').textContent = couplesCurrentPartner === 1 ? 'Partner 1' : 'Partner 2';
+      document.getElementById('couplesQuestionCounter').textContent = `Question ${couplesCurrentQuestion + 1} of ${questions.length}`;
+      document.getElementById('couplesQuestionText').textContent = q.question;
 
-        function copyLink() {
-            copyToClipboard(window.location.href);
-        }
+      const grid = document.getElementById('couplesOptionsGrid');
+      grid.innerHTML = '';
+      q.options.forEach((option, index) => {
+        const card = document.createElement('div');
+        card.className = 'option-card';
+        card.textContent = option;
+        card.onclick = () => selectCouplesOption(index, card);
+        grid.appendChild(card);
+      });
 
-        function copyToClipboard(text) {
-            navigator.clipboard.writeText(text).then(() => {
-                alert('💕 Copied to clipboard! Share with friends!');
-            }).catch(() => {
-                const textarea = document.createElement('textarea');
-                textarea.value = text;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                alert('💕 Copied to clipboard!');
-            });
-        }
+      updateProgress(couplesCurrentQuestion + 1);
+    }
 
-        function resetQuiz() {
-            currentQuestion = 0;
-            answers = [];
-            selectedGender = 'any';
-            partner1Answers = [];
-            partner2Answers = [];
-            couplesCurrentPartner = 1;
-            couplesCurrentQuestion = 0;
-            showPage('landing');
-        }
+    function selectCouplesOption(index, element) {
+      document.querySelectorAll('#couplesOptionsGrid .option-card').forEach(card => card.classList.remove('selected'));
+      element.classList.add('selected');
 
-        function showCouplesIntro() {
-            partner1Answers = [];
-            partner2Answers = [];
-            couplesCurrentPartner = 1;
-            couplesCurrentQuestion = 0;
-            showPage('couples-intro');
-        }
-
-        function startCouplesQuiz() {
-            couplesCurrentPartner = 1;
-            couplesCurrentQuestion = 0;
-            showPage('couples-quiz');
-            updateProgress(1);
+      setTimeout(() => {
+        if (couplesCurrentPartner === 1) {
+          partner1Answers.push(index);
+          if (couplesCurrentQuestion < questions.length - 1) {
+            couplesCurrentQuestion++;
             displayCouplesQuestion();
+          } else {
+            couplesCurrentPartner = 2;
+            partner2Answers = [];
+            couplesCurrentQuestion = 0;
+            displayCouplesQuestion();
+            updateProgress(1);
+          }
+        } else {
+          partner2Answers.push(index);
+          if (couplesCurrentQuestion < questions.length - 1) {
+            couplesCurrentQuestion++;
+            displayCouplesQuestion();
+          } else {
+            showCouplesLoading();
+          }
         }
+      }, 600);
+    }
 
-        function displayCouplesQuestion() {
-            const q = questions[couplesCurrentQuestion];
-            document.getElementById('couplesPartnerBadge').textContent = couplesCurrentPartner === 1 ? 'Partner 1' : 'Partner 2';
-            document.getElementById('couplesQuestionCounter').textContent = `Question ${couplesCurrentQuestion + 1} of ${questions.length}`;
-            document.getElementById('couplesQuestionText').textContent = q.question;
+    function showCouplesLoading() {
+      showPage('couples-loading');
+      setTimeout(() => {
+        const score = calculateCouplesCompatibility(partner1Answers, partner2Answers);
+        showCouplesResults(score);
+      }, 2500);
+    }
 
-            const grid = document.getElementById('couplesOptionsGrid');
-            grid.innerHTML = '';
-            q.options.forEach((option, index) => {
-                const card = document.createElement('div');
-                card.className = 'option-card';
-                card.textContent = option;
-                card.onclick = () => selectCouplesOption(index, card);
-                grid.appendChild(card);
-            });
+    function calculateCouplesCompatibility(p1, p2) {
+      let matches = 0;
+      for (let i = 0; i < questions.length; i++) {
+        if (p1[i] === p2[i]) matches++;
+        else if (Math.abs(p1[i] - p2[i]) === 1) matches += 0.5;
+      }
+      const raw = (matches / questions.length) * 100;
+      return Math.min(100, Math.round(raw + (Math.random() * 6 - 3)));
+    }
 
-            updateProgress(couplesCurrentQuestion + 1);
+    function showCouplesResults(score) {
+      document.getElementById('couplesScoreDisplay').textContent = score + '%';
+      const verdict = couplesVerdicts.find(v => score >= v.min && score <= v.max);
+      document.getElementById('couplesVerdict').textContent = verdict ? verdict.text : couplesVerdicts[couplesVerdicts.length - 1].text;
+      showPage('couples-results');
+    }
+
+    function shareCouplesResult() {
+      const score = document.getElementById('couplesScoreDisplay').textContent;
+      const text = `💑 We're ${score} compatible on the Valentine's Matcher!\n\nCheck your compatibility: ${window.location.href}`;
+      if (navigator.share) {
+        navigator.share({
+          title: 'Valentine\'s Matcher',
+          text: text
+        }).catch(() => copyToClipboard(text));
+      } else {
+        copyToClipboard(text);
+      }
+    }
+
+    function resetCouplesQuiz() {
+      showCouplesIntro();
+    }
+
+    generateHearts();
+
+    // Background music: start after first click (browser autoplay rules), loop, volume 0.3
+    (function () {
+      const bgMusic = document.getElementById('bgMusic');
+      const musicToggle = document.getElementById('musicToggle');
+      if (!bgMusic || !musicToggle) return;
+      bgMusic.volume = 0.3;
+      bgMusic.loop = true;
+      let musicUnlocked = false;
+      function unlockAndPlay() {
+        if (!musicUnlocked) {
+          musicUnlocked = true;
+          bgMusic.play().catch(function () {});
+          document.removeEventListener('click', unlockAndPlay);
+          document.removeEventListener('keydown', unlockAndPlay);
+          musicToggle.textContent = '❚❚';
         }
-
-        function selectCouplesOption(index, element) {
-            document.querySelectorAll('#couplesOptionsGrid .option-card').forEach(card => card.classList.remove('selected'));
-            element.classList.add('selected');
-
-            setTimeout(() => {
-                if (couplesCurrentPartner === 1) {
-                    partner1Answers.push(index);
-                    if (couplesCurrentQuestion < questions.length - 1) {
-                        couplesCurrentQuestion++;
-                        displayCouplesQuestion();
-                    } else {
-                        couplesCurrentPartner = 2;
-                        partner2Answers = [];
-                        couplesCurrentQuestion = 0;
-                        displayCouplesQuestion();
-                        updateProgress(1);
-                    }
-                } else {
-                    partner2Answers.push(index);
-                    if (couplesCurrentQuestion < questions.length - 1) {
-                        couplesCurrentQuestion++;
-                        displayCouplesQuestion();
-                    } else {
-                        showCouplesLoading();
-                    }
-                }
-            }, 600);
+      }
+      document.addEventListener('click', unlockAndPlay);
+      document.addEventListener('keydown', unlockAndPlay);
+      musicToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        if (!musicUnlocked) {
+          unlockAndPlay();
+          return;
         }
-
-        function showCouplesLoading() {
-            showPage('couples-loading');
-            setTimeout(() => {
-                const score = calculateCouplesCompatibility(partner1Answers, partner2Answers);
-                showCouplesResults(score);
-            }, 2500);
+        if (bgMusic.paused) {
+          bgMusic.play().catch(function () {});
+          musicToggle.textContent = '❚❚';
+        } else {
+          bgMusic.pause();
+          musicToggle.textContent = '▶';
         }
-
-        function calculateCouplesCompatibility(p1, p2) {
-            let matches = 0;
-            for (let i = 0; i < questions.length; i++) {
-                if (p1[i] === p2[i]) matches++;
-                else if (Math.abs(p1[i] - p2[i]) === 1) matches += 0.5;
-            }
-            const raw = (matches / questions.length) * 100;
-            return Math.min(100, Math.round(raw + (Math.random() * 6 - 3)));
-        }
-
-        function showCouplesResults(score) {
-            document.getElementById('couplesScoreDisplay').textContent = score + '%';
-            const verdict = couplesVerdicts.find(v => score >= v.min && score <= v.max);
-            document.getElementById('couplesVerdict').textContent = verdict ? verdict.text : couplesVerdicts[couplesVerdicts.length - 1].text;
-            showPage('couples-results');
-        }
-
-        function shareCouplesResult() {
-            const score = document.getElementById('couplesScoreDisplay').textContent;
-            const text = `💑 We're ${score} compatible on the Valentine's Matcher!\n\nCheck your compatibility: ${window.location.href}`;
-            if (navigator.share) {
-                navigator.share({ title: 'Valentine\'s Matcher', text: text }).catch(() => copyToClipboard(text));
-            } else {
-                copyToClipboard(text);
-            }
-        }
-
-        function resetCouplesQuiz() {
-            showCouplesIntro();
-        }
-
-        generateHearts();
-    </script>
+      });
+      bgMusic.addEventListener('play', function () { musicToggle.textContent = '❚❚'; });
+      bgMusic.addEventListener('pause', function () { musicToggle.textContent = '▶'; });
+    })();
+  </script>
 </body>
+
 </html>
